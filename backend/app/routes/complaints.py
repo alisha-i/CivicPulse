@@ -43,3 +43,34 @@ def list_complaints(
         "page_size": page_size,
         "items": items
     }
+
+from app.schemas import ComplaintStatusUpdate
+
+VALID_TRANSITIONS = {
+    StatusEnum.open: {StatusEnum.in_progress, StatusEnum.rejected},
+    StatusEnum.in_progress: {StatusEnum.resolved, StatusEnum.rejected},
+    StatusEnum.resolved: set(),
+    StatusEnum.rejected: set(),
+}
+
+@router.patch("/{complaint_id}/status", response_model=ComplaintResponse)
+def update_complaint_status(complaint_id: UUID, status_update: ComplaintStatusUpdate, db: Session = Depends(get_db)):
+    db_complaint = complaint_repo.get_complaint(db, complaint_id)
+    if not db_complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found")
+    
+    current_status = db_complaint.status
+    new_status = status_update.status
+
+    if new_status not in VALID_TRANSITIONS[current_status]:
+        raise HTTPException(
+            status_code=409, 
+            detail=f"Invalid transition from {current_status.value} to {new_status.value}"
+        )
+    
+    db_complaint.status = new_status
+    db.commit()
+    db.refresh(db_complaint)
+    
+    logger.info("complaint_status_updated", complaint_id=str(complaint_id), old=current_status.value, new=new_status.value)
+    return db_complaint
