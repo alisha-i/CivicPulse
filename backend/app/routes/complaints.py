@@ -9,14 +9,30 @@ from app.models import CategoryEnum, PriorityEnum, StatusEnum
 from app.repositories import complaint_repo
 from app.services import triage_service
 from app.logger import logger
+from app.redis_client import invalidate_stats_cache, check_rate_limit
+from fastapi import Request
 
 router = APIRouter(prefix="/api/complaints", tags=["Complaints"])
 
 @router.post("", response_model=ComplaintResponse, status_code=201)
-def submit_complaint(complaint: ComplaintCreate, db: Session = Depends(get_db)):
+def submit_complaint(request: Request, complaint: ComplaintCreate, db: Session = Depends(get_db)):
     logger.info("submit_complaint_started")
+    
+    # Rate Limiting
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    allowed, retry_after = check_rate_limit(client_ip)
+    if not allowed:
+        raise HTTPException(
+            status_code=429, 
+            detail="Rate limit exceeded",
+            headers={"Retry-After": str(retry_after)}
+        )
+        
     triage_result = triage_service.perform_triage(complaint)
     db_complaint = complaint_repo.create_complaint(db, complaint, triage_result)
+    
+    invalidate_stats_cache()
+    
     logger.info("submit_complaint_success", complaint_id=str(db_complaint.id))
     return db_complaint
 
@@ -71,6 +87,8 @@ def update_complaint_status(complaint_id: UUID, status_update: ComplaintStatusUp
     db_complaint.status = new_status
     db.commit()
     db.refresh(db_complaint)
+    
+    invalidate_stats_cache()
     
     logger.info("complaint_status_updated", complaint_id=str(complaint_id), old=current_status.value, new=new_status.value)
     return db_complaint

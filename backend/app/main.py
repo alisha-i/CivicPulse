@@ -28,10 +28,12 @@ app.add_middleware(RequestIdMiddleware)
 from app.routes.complaints import router as complaints_router
 from app.routes.monitoring import router as monitoring_router
 from app.routes.meta import router as meta_router
+from app.routes.stats import router as stats_router
 
 app.include_router(complaints_router)
 app.include_router(monitoring_router)
 app.include_router(meta_router)
+app.include_router(stats_router)
 
 @app.get("/health")
 def health_check():
