@@ -1,0 +1,45 @@
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.orm import Session
+from uuid import UUID
+from typing import Optional
+
+from app.database import get_db
+from app.schemas import ComplaintCreate, ComplaintResponse, ComplaintListResponse
+from app.models import CategoryEnum, PriorityEnum, StatusEnum
+from app.repositories import complaint_repo
+from app.services import triage_service
+from app.logger import logger
+
+router = APIRouter(prefix="/api/complaints", tags=["Complaints"])
+
+@router.post("", response_model=ComplaintResponse, status_code=201)
+def submit_complaint(complaint: ComplaintCreate, db: Session = Depends(get_db)):
+    logger.info("submit_complaint_started")
+    triage_result = triage_service.perform_triage(complaint)
+    db_complaint = complaint_repo.create_complaint(db, complaint, triage_result)
+    logger.info("submit_complaint_success", complaint_id=str(db_complaint.id))
+    return db_complaint
+
+@router.get("/{complaint_id}", response_model=ComplaintResponse)
+def get_complaint(complaint_id: UUID, db: Session = Depends(get_db)):
+    db_complaint = complaint_repo.get_complaint(db, complaint_id)
+    if not db_complaint:
+        raise HTTPException(status_code=404, detail="Complaint not found")
+    return db_complaint
+
+@router.get("", response_model=ComplaintListResponse)
+def list_complaints(
+    category: Optional[CategoryEnum] = None,
+    priority: Optional[PriorityEnum] = None,
+    status: Optional[StatusEnum] = None,
+    page: int = Query(1, ge=1),
+    page_size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db)
+):
+    total, items = complaint_repo.list_complaints(db, category, priority, status, page, page_size)
+    return {
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "items": items
+    }

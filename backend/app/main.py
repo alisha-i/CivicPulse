@@ -25,6 +25,9 @@ app = FastAPI(
 # Add Request ID Middleware
 app.add_middleware(RequestIdMiddleware)
 
+from app.routes.complaints import router as complaints_router
+app.include_router(complaints_router)
+
 @app.get("/health")
 def health_check():
     """
