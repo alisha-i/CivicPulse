@@ -1,14 +1,17 @@
 from app.schemas import ComplaintCreate
-from app.models import CategoryEnum, PriorityEnum
+from app.providers.triage.factory import get_triage_provider
 from app.logger import logger
 
 def perform_triage(complaint: ComplaintCreate) -> dict:
-    # Phase 6 will implement full TriageProvider
-    logger.info("triage_performed", provider="simulated", detail="Simulated dummy triage for now")
+    provider = get_triage_provider()
+    
+    logger.info("triage_started", provider=provider.name)
+    result = provider.triage(complaint.text, complaint.location)
+    
     return {
-        "category": CategoryEnum.other,
-        "priority": PriorityEnum.normal,
-        "summary": "Simulated AI summary",
-        "triaged_by": "simulated",
-        "triage_latency_ms": 100
+        "category": result.category,
+        "priority": result.priority,
+        "summary": result.summary,
+        "triaged_by": result.triaged_by,
+        "triage_latency_ms": getattr(result, "triage_latency_ms", 100) # LLM handles its own latency logging usually, but we pass what we have
     }
