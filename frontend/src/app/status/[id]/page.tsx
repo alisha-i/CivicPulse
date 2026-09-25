@@ -5,7 +5,7 @@ import { useParams } from "next/navigation";
 
 export default function StatusPage() {
   const params = useParams();
-  const id = params.id as str;
+  const id = params.id as string;
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState("");
 
@@ -34,7 +34,7 @@ export default function StatusPage() {
     return () => clearInterval(intervalId);
   }, [id]);
 
-  const getStatusColor = (status: str) => {
+  const getStatusColor = (status: string) => {
     switch (status) {
       case "open": return "bg-yellow-100 text-yellow-800 border-yellow-300";
       case "in_progress": return "bg-blue-100 text-blue-800 border-blue-300";
