@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: civicpulse-config
+  namespace: civicpulse
+data:
+  DB_USER: postgres
+  DB_NAME: civicpulse
+  TRIAGE_PROVIDER: simulated
+  NEXT_PUBLIC_API_URL: http://backend:8000
