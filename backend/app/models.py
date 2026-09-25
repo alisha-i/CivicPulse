@@ -1,8 +1,11 @@
-from sqlalchemy import Column, String, Integer, DateTime, Enum, Index, func
-from sqlalchemy.dialects.postgresql import UUID
 import enum
 import uuid
+
+from sqlalchemy import Column, DateTime, Enum, Index, Integer, String, func
+from sqlalchemy.dialects.postgresql import UUID
+
 from app.database import Base
+
 
 class CategoryEnum(str, enum.Enum):
     water = "water"
@@ -12,16 +15,19 @@ class CategoryEnum(str, enum.Enum):
     streetlights = "streetlights"
     other = "other"
 
+
 class PriorityEnum(str, enum.Enum):
     high = "high"
     normal = "normal"
     low = "low"
+
 
 class StatusEnum(str, enum.Enum):
     open = "open"
     in_progress = "in_progress"
     resolved = "resolved"
     rejected = "rejected"
+
 
 class Complaint(Base):
     __tablename__ = "complaints"
@@ -38,6 +44,7 @@ class Complaint(Base):
     triage_latency_ms = Column(Integer, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
 
 # Required indexes
 Index("ix_complaints_status_priority", Complaint.status, Complaint.priority)

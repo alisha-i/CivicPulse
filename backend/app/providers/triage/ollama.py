@@ -1,9 +1,10 @@
-from .base import TriageProvider, TriageResult
+from .base import TriageResult
 from .rules import RuleBasedTriage
+
 
 class OllamaTriage:
     name = "llm:ollama"
-    
+
     def __init__(self):
         self.rules_fallback = RuleBasedTriage()
 
