@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   postgres:
     image: postgres:16
@@ -52,11 +50,23 @@ services:
       - REDIS_URL=redis://redis:6379/0
       - TRIAGE_PROVIDER=${TRIAGE_PROVIDER:-simulated}
       - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OLLAMA_URL=http://ollama:11434/api/generate
     depends_on:
       postgres:
         condition: service_healthy
       redis:
         condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - civicpulse-net
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: civicpulse-ollama-compose
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
     networks:
       - civicpulse-net
 
@@ -79,6 +89,7 @@ services:
 volumes:
   postgres_data:
   redis_data:
+  ollama_data:
 
 networks:
   civicpulse-net:
