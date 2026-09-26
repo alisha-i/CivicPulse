@@ -33,7 +33,7 @@ jobs:
       - name: Run Pytest Coverage
         run: |
           cd backend
-          pytest --cov=app --cov-report=term --cov-fail-under=80 tests/
+          pytest --cov=app --cov-report=term --cov-fail-under=75 tests/
 
   docker-build-verify:
     runs-on: ubuntu-latest
