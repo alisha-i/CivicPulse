@@ -1,0 +1,96 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: civicpulse-postgres-compose
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+      POSTGRES_DB: ${DB_NAME:-civicpulse}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d civicpulse"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - civicpulse-net
+    # Port is deliberately NOT exposed to the host to satisfy "Do not expose database ports directly" requirement.
+
+  redis:
+    image: redis:7
+    container_name: civicpulse-redis-compose
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - civicpulse-net
+    # Port is deliberately NOT exposed.
+
+  backend:
+    build: 
+      context: ./backend
+      # Assuming a simple Dockerfile exists, if not, we map local files for now or use the one we'll build in Phase 11.
+      # For Phase 9, since we haven't done Phase 11 production builds yet, we will just use a generic python dev environment 
+      # OR the actual Dockerfile if we have one. Let's use a standard docker approach for dev.
+    image: civicpulse-backend
+    container_name: civicpulse-backend-compose
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/civicpulse
+      - REDIS_URL=redis://redis:6379/0
+      - TRIAGE_PROVIDER=${TRIAGE_PROVIDER:-simulated}
+      - GROQ_API_KEY=${GROQ_API_KEY:-}
+      - OLLAMA_URL=http://ollama:11434/api/generate
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      ollama:
+        condition: service_started
+    networks:
+      - civicpulse-net
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: civicpulse-ollama-compose
+    restart: unless-stopped
+    volumes:
+      - ollama_data:/root/.ollama
+    networks:
+      - civicpulse-net
+
+  frontend:
+    build:
+      context: ./frontend
+    image: civicpulse-frontend
+    container_name: civicpulse-frontend-compose
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8000
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - civicpulse-net
+
+volumes:
+  postgres_data:
+  redis_data:
+  ollama_data:
+
+networks:
+  civicpulse-net:
+    driver: bridge
