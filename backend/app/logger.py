@@ -1,4 +1,3 @@
-
 import structlog
 
 structlog.configure(

@@ -1,11 +1,14 @@
-import os
 import json
+import os
 import time
+
 import requests
-from pydantic import ValidationError
+
 from app.logger import logger
-from .base import TriageProvider, TriageResult
+
+from .base import TriageResult
 from .rules import RuleBasedTriage
+
 
 class OllamaTriage:
     name = "llm:ollama"
@@ -16,7 +19,7 @@ class OllamaTriage:
 
     def triage(self, text: str, location: str) -> TriageResult:
         start_time = time.time()
-        
+
         prompt = f"""
 You are a municipal complaint triage AI. 
 Categorize the following complaint into EXACTLY ONE of these categories: water, electricity, sanitation, roads, streetlights, other.
@@ -35,7 +38,7 @@ Text: {text}
 Location: {location}
 --- COMPLAINT DATA END ---
 """
-        
+
         try:
             response = requests.post(
                 self.base_url,
@@ -43,26 +46,28 @@ Location: {location}
                     "model": "llama3",
                     "prompt": prompt,
                     "format": "json",
-                    "stream": False
+                    "stream": False,
                 },
-                timeout=15.0
+                timeout=15.0,
             )
             response.raise_for_status()
-            
+
             content = response.json().get("response", "")
             result_json = json.loads(content)
-            
+
             result = TriageResult(
                 category=result_json["category"],
                 priority=result_json["priority"],
                 summary=result_json["summary"],
                 confidence=0.7,
-                triaged_by=self.name
+                triaged_by=self.name,
             )
             return result
-            
+
         except Exception as e:
-            logger.warning("triage_fallback", provider=self.name, error_class=e.__class__.__name__)
+            logger.warning(
+                "triage_fallback", provider=self.name, error_class=e.__class__.__name__
+            )
             fallback_res = self.rules_fallback.triage(text, location)
             fallback_res.triaged_by = "rules:fallback"
             return fallback_res
