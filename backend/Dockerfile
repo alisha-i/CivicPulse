@@ -23,7 +23,7 @@ ENV PATH=/home/appuser/.local/bin:$PATH
 
 # Copy application code (excluding tests and scripts via .dockerignore, or explicitly)
 COPY --chown=appuser:appuser app/ ./app/
-COPY --chown=appuser:appuser config.py alembic.ini ./
+COPY --chown=appuser:appuser alembic.ini ./
 COPY --chown=appuser:appuser alembic/ ./alembic/
 
 EXPOSE 8000
