@@ -53,3 +53,5 @@ spec:
   ports:
   - port: 8000
     targetPort: 8000
+
+# Backend deployment config with resource limits
