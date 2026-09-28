@@ -1,3 +1,4 @@
+# Load environment variables via Pydantic
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
