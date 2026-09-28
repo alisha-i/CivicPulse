@@ -105,3 +105,5 @@ def update_complaint_status(
         new=new_status.value,
     )
     return db_complaint
+
+# Core endpoint for complaint ingestion
