@@ -19,8 +19,8 @@ flowchart TD
     API -->|Saves record| DB[(PostgreSQL)]
     
     API -->|1. Try Cloud AI| Groq(Groq Llama-3)
-    Groq -- Success --> API
-    Groq -- Timeout/Fail -.-> Fallback(Rule-based Fallback Engine)
+    Groq -->|Success| API
+    Groq -.->|Timeout/Fail| Fallback(Rule-based Fallback Engine)
     Fallback -.-> API
     
     API -->|Returns Result| Frontend
