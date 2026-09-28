@@ -1,3 +1,4 @@
+# Health and monitoring endpoints
 import redis
 from fastapi import APIRouter, Depends, HTTPException, Response
 from prometheus_client import CONTENT_TYPE_LATEST, Counter, Histogram, generate_latest
