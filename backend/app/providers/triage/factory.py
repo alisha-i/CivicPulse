@@ -1,3 +1,4 @@
+# Factory to instantiate triage providers
 import os
 
 from .base import TriageProvider
