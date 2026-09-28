@@ -44,10 +44,4 @@ docker-compose up -d --build
 | `/api/v1/complaints/triage` | `POST` | Process & triage a complaint | `{ "text": "...", "location": "..." }` | `{ "category": "...", "priority": "...", "department": "..." }` |
 | `/api/v1/monitoring/metrics`| `GET` | Get system metrics & triage stats | None | `{ "total_complaints": 150, "fallback_invocations": 2 }` |
 
-## 📸 Screenshots
 
-*(Insert your frontend screenshot here)*
-![Frontend Screenshot](docs/images/frontend_placeholder.png)
-
-*(Insert your K8s/HPA terminal screenshot here)*
-![HPA Screenshot](docs/images/hpa_placeholder.png)
