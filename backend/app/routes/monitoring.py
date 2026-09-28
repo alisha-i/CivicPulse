@@ -60,4 +60,5 @@ def metrics():
     data = generate_latest()
     return Response(content=data, media_type=CONTENT_TYPE_LATEST)
 
+
 # Keep these endpoints light to avoid performance hits

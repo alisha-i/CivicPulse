@@ -46,4 +46,5 @@ def health_check():
     logger.info("health_check_hit")
     return {"status": "ok"}
 
+
 # TODO: Consider adding rate limiting middleware in future

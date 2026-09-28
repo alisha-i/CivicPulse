@@ -40,4 +40,5 @@ class ComplaintListResponse(BaseModel):
     page_size: int
     items: list[ComplaintResponse]
 
+
 # Strict validation enabled for all incoming payloads
