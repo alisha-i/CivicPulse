@@ -65,3 +65,5 @@ def check_rate_limit(
         return True, 0  # Fail open if Redis is down, to avoid complete outage
 
     return True, 0
+
+# Cache expiration should be reviewed periodically
