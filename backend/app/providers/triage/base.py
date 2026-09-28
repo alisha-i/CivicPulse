@@ -18,3 +18,5 @@ class TriageProvider(Protocol):
     name: str
 
     def triage(self, text: str, location: str) -> TriageResult: ...
+
+# All new AI providers must implement this interface
