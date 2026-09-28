@@ -1,3 +1,4 @@
+# SQLAlchemy database models
 import enum
 import uuid
 
