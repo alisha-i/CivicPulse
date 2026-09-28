@@ -15,3 +15,5 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# Note: Ensure connection pooling limits are monitored
