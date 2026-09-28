@@ -50,3 +50,5 @@ class Complaint(Base):
 # Required indexes
 Index("ix_complaints_status_priority", Complaint.status, Complaint.priority)
 Index("ix_complaints_created_at", Complaint.created_at)
+
+# SQLAlchemy models define the exact DB schema
