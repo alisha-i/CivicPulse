@@ -17,3 +17,5 @@ spec:
       target:
         type: Utilization
         averageUtilization: 70
+
+# Horizontal Pod Autoscaler configuration for backend
